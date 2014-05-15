@@ -1,17 +1,25 @@
 class EmailController < ApplicationController
 
+  respond_to :json
+
   def about
   end
 
   def email
-    email = email_params
-    SiteMailer.status_email(email[:email], email[:subject], email[:body]).deliver
-    render nothing: true, status: 200
+    subject = params[:email][:subject]
+    body = params[:email][:body]
+    email = params[:email][:email]
+    EmailsWorker.perform_async(email, subject, body)
+    redirect_to root_path
   end
 
-private
-  def email_params
-    params.require(:email).permit(:subject, :body, :email)
-  end
+  # def email
+  #   #email = email_params
+  #   # SiteMailer.status_email(email[:email], email[:subject], email[:body]).deliver
+  #   EmailsWorker.perform_async(email, subject, body)
+  #   render nothing: true, status: 200
+  # end
+
+
 
 end
